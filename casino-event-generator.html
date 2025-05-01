@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore Eventi Casinò</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0ea5e9;
+            --accent: #3b82f6;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f1f5f9;
+            --border: #cbd5e1;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .main-title {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section-title {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.75rem;
+            color: var(--secondary);
+        }
+
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .day-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-card.selected {
+            background: var(--primary);
+            color: var(--text-light);
+            border-color: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .day-card.selected .day-icon {
+            color: var(--text-light);
+        }
+
+        .day-name {
+            font-weight: 600;
+        }
+
+        .day-checkbox {
+            display: none;
+        }
+
+        .event-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+        }
+
+        .event-day {
+            background: var(--background);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        .event-day-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .event-day-title i {
+            margin-right: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .event-select-container {
+            position: relative;
+        }
+
+        .event-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: var(--card-bg);
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .event-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        .output-section {
+            margin-top: 2rem;
+        }
+
+        .code-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 300px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            color: #374151;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: none;
+        }
+
+        .code-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--primary);
+            color: var(--text-light);
+            padding: 0.75rem 1rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+        }
+
+        .code-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot-red {
+            background-color: #ef4444;
+        }
+
+        .code-dot-yellow {
+            background-color: #f59e0b;
+        }
+
+        .code-dot-green {
+            background-color: #10b981;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background-color: #0284c7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-dark);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .days-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .days-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .buttons-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <header class="header">
+            <h1 class="main-title">Generatore Eventi Casinò</h1>
+            <p class="subtitle">Crea facilmente il codice per gli eventi settimanali</p>
+        </header>
+
+        <main class="container">
+            <div class="content">
+                <section>
+                    <h2 class="section-title"><i class="fas fa-calendar-alt"></i>Seleziona i giorni con eventi</h2>
+                    <div class="days-container">
+                        <div class="day-card" onclick="toggleDay(this, 0)">
+                            <input type="checkbox" id="day0" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Lunedì</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 1)">
+                            <input type="checkbox" id="day1" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Martedì</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 2)">
+                            <input type="checkbox" id="day2" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Mercoledì</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 3)">
+                            <input type="checkbox" id="day3" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Giovedì</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 4)">
+                            <input type="checkbox" id="day4" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Venerdì</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 5)">
+                            <input type="checkbox" id="day5" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Sabato</span>
+                        </div>
+                        <div class="day-card" onclick="toggleDay(this, 6)">
+                            <input type="checkbox" id="day6" class="day-checkbox">
+                            <i class="fas fa-calendar-day day-icon"></i>
+                            <span class="day-name">Domenica</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="event-section" id="eventSection">
+                    <!-- Qui verranno generati dinamicamente i selettori di eventi per i giorni selezionati -->
+                </section>
+                
+                <section class="output-section">
+                    <h2 class="section-title"><i class="fas fa-code"></i>Codice generato</h2>
+                    <div class="code-container">
+                        <div class="code-header">
+                            <div class="code-dots">
+                                <div class="code-dot code-dot-red"></div>
+                                <div class="code-dot code-dot-yellow"></div>
+                                <div class="code-dot code-dot-green"></div>
+                            </div>
+                            <span>JavaScript</span>
+                        </div>
+                        <textarea id="outputCode" class="code-textarea" readonly></textarea>
+                    </div>
+                    <div class="buttons-container">
+                        <button class="btn btn-primary" onclick="generateCode()">
+                            <i class="fas fa-magic"></i>Genera Codice
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyToClipboard()">
+                            <i class="fas fa-copy"></i>Copia negli Appunti
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 Generatore Eventi Casinò</p>
+        </footer>
+    </div>
+
+    <script>
+        // Definizione degli eventi disponibili
+        const availableEvents = [
+            {
+                id: "minimoto",
+                name: "Gara Mini Moto",
+                title: "Gara Mini Moto",
+                description: "Scalda il motore e preparati a dare il massimo nella Gara Mini Moto più folle della città! Ti aspetta un'entusiasmante competizione sull'ovale dietro il Casinò, dove solo i più agili, veloci e determinati riusciranno a completare tutti e 20 i giri e tagliare il traguardo per primi. La pista è stretta, le curve sono insidiose e ogni errore può costarti la vittoria! Porta la tua Mini Moto, affila i riflessi e dimostra chi è il vero re dell'asfalto. In palio ci sono ben 50.000€, ma solo uno potrà alzare il trofeo. Non è solo una gara, è una battaglia all'ultimo metro. Sei pronto a far rombare il motore e lasciare tutti dietro di te?",
+                image: "image/events/icon/minimotoicon.png",
+                flyer: "image/events/flyer/minimotorace.png"
+            },
+            {
+                id: "carrellokart",
+                name: "Corsa Carrello-Kart",
+                title: "Corsa Carrello-Kart",
+                description: "Prepara le ruote, impugna il volante e scatena la tua follia nella Corsa Carrello-Kart più pazza di sempre! Sul percorso cittadino ricavato tra rampe, salti e ostacoli improbabili, serviranno equilibrio, audacia e un pizzico di pazzia per restare in pista. Nessuna regola, solo adrenalina pura e 30 concorrenti decisi a tutto per conquistare la vittoria. Il primo che taglia il traguardo vince 25.000€, ma anche la gloria eterna tra i piloti più fuori di testa. Hai il coraggio di salire sul carrello e sfrecciare verso la leggenda?",
+                image: "image/events/icon/carrellokarticon.png",
+                flyer: "image/events/flyer/carrellokartrace.png"
+            },
+            {
+                id: "gokart",
+                name: "Sfida Go-Kart",
+                title: "Sfida Go-Kart",
+                description: "La pista ti aspetta! Mettiti al volante del tuo Go-Kart e preparati a bruciare l’asfalto in una gara che metterà alla prova la tua abilità e il tuo sangue freddo. Curve strette, rettilinei mozzafiato e avversari agguerriti renderanno ogni giro una sfida. I migliori piloti si affronteranno per 40.000€ e il titolo di campione Go-Kart della stagione. Solo chi saprà gestire il mezzo e tenere i nervi saldi fino all’ultimo metro potrà trionfare. Accendi il motore, la bandiera a scacchi ti aspetta!",
+                image: "image/events/icon/gokarticon.png",
+                flyer: "image/events/flyer/gokartrace.png"
+            },
+            {
+                id: "minicar",
+                name: "Gran Premio Mini Car",
+                title: "Gran Premio Mini Car",
+                description: "Mini auto, massimo spettacolo! Il Gran Premio Mini Car è l'evento ideale per chi ama la velocità e il divertimento su quattro ruote in formato ridotto. Una gara su circuito cittadino tecnico e imprevedibile, dove ogni curva può cambiare le sorti della corsa. Tattica, riflessi e precisione saranno fondamentali per completare i 15 giri e conquistare il primo posto. Il vincitore si porta a casa 35.000€ e il rispetto di tutti i mini-piloti della città. Sei pronto a scrivere il tuo nome nella leggenda delle Mini Car?",
+                image: "image/events/icon/minicaricon.png",
+                flyer: "image/events/flyer/minicarrace.png"
+            },
+        ];
+
+        // Array per tenere traccia dei giorni selezionati
+        const selectedDays = [false, false, false, false, false, false, false];
+        const selectedEvents = [null, null, null, null, null, null, null];
+        
+        // Giorni della settimana in italiano
+        const daysOfWeek = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
+        const dayIcons = ["fa-calendar-day", "fa-calendar-day", "fa-calendar-day", "fa-calendar-day", "fa-calendar-day", "fa-star", "fa-sun"];
+
+        // Funzione per alternare la selezione dei giorni
+        function toggleDay(element, dayIndex) {
+            const checkbox = element.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('selected');
+                selectedDays[dayIndex] = true;
+            } else {
+                element.classList.remove('selected');
+                selectedDays[dayIndex] = false;
+                selectedEvents[dayIndex] = null;
+            }
+            
+            updateEventSelectors();
+        }
+        
+        // Aggiorna i selettori di eventi in base ai giorni selezionati
+        function updateEventSelectors() {
+            const eventSection = document.getElementById('eventSection');
+            eventSection.innerHTML = '';
+            
+            let hasSelectedDays = false;
+            
+            for (let i = 0; i < selectedDays.length; i++) {
+                if (selectedDays[i]) {
+                    hasSelectedDays = true;
+                    
+                    const eventDay = document.createElement('div');
+                    eventDay.className = 'event-day';
+                    
+                    const dayHeader = document.createElement('h3');
+                    dayHeader.className = 'event-day-title';
+                    dayHeader.innerHTML = `<i class="fas ${dayIcons[i]}"></i> ${daysOfWeek[i]}`;
+                    eventDay.appendChild(dayHeader);
+                    
+                    const eventSelectContainer = document.createElement('div');
+                    eventSelectContainer.className = 'event-select-container';
+                    
+                    const eventSelect = document.createElement('select');
+                    eventSelect.className = 'event-select';
+                    eventSelect.setAttribute('data-day', i);
+                    eventSelect.addEventListener('change', function() {
+                        const selectedEventId = this.value;
+                        const dayIndex = parseInt(this.getAttribute('data-day'));
+                        
+                        if (selectedEventId) {
+                            const event = availableEvents.find(e => e.id === selectedEventId);
+                            selectedEvents[dayIndex] = event;
+                        } else {
+                            selectedEvents[dayIndex] = null;
+                        }
+                    });
+                    
+                    // Aggiunta opzione vuota
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Seleziona un evento';
+                    eventSelect.appendChild(defaultOption);
+                    
+                    // Aggiunta delle opzioni eventi
+                    availableEvents.forEach(event => {
+                        const option = document.createElement('option');
+                        option.value = event.id;
+                        option.textContent = event.name;
+                        eventSelect.appendChild(option);
+                    });
+                    
+                    // Se c'è già un evento selezionato per questo giorno, impostiamo il valore
+                    if (selectedEvents[i]) {
+                        eventSelect.value = selectedEvents[i].id;
+                    }
+                    
+                    eventSelectContainer.appendChild(eventSelect);
+                    const selectArrow = document.createElement('i');
+                    selectArrow.className = 'fas fa-chevron-down select-arrow';
+                    eventSelectContainer.appendChild(selectArrow);
+                    
+                    eventDay.appendChild(eventSelectContainer);
+                    eventSection.appendChild(eventDay);
+                }
+            }
+            
+            if (hasSelectedDays) {
+                const sectionTitle = document.createElement('h2');
+                sectionTitle.className = 'section-title';
+                sectionTitle.innerHTML = '<i class="fas fa-list-alt"></i>Seleziona gli eventi';
+                eventSection.prepend(sectionTitle);
+            }
+        }
+        
+        // Genera il codice JavaScript per gli eventi settimanali
+        function generateCode() {
+            let code = "// Gestione eventi settimanali\n";
+            code += "document.addEventListener('DOMContentLoaded', function() {\n";
+            code += "    // Struttura dati per gli eventi\n";
+            code += "    // Popolare con i dati degli eventi quando disponibili\n";
+            code += "    const weeklyEvents = [\n";
+            
+            for (let i = 0; i < 7; i++) {
+                if (selectedEvents[i]) {
+                    const event = selectedEvents[i];
+                    code += `        { // ${daysOfWeek[i]} - ${event.name}\n`;
+                    code += `            title: "${event.title}",\n`;
+                    code += `            description: "${event.description}",\n`;
+                    code += `            image: "${event.image}",\n`;
+                    code += `            flyer: "${event.flyer}"\n`;
+                    code += "        }";
+                } else {
+                    code += `        null, // ${daysOfWeek[i]} - nessun evento`;
+                }
+                
+                if (i < 6) {
+                    code += ",\n";
+                } else {
+                    code += "\n";
+                }
+            }
+            
+            code += "    ];\n";
+            code += "});\n";
+            
+            document.getElementById('outputCode').value = code;
+        }
+        
+        // Funzione per copiare il codice negli appunti
+        function copyToClipboard() {
+            const outputCode = document.getElementById('outputCode');
+            outputCode.select();
+            document.execCommand('copy');
+            
+            // Feedback all'utente
+            const copyBtn = document.querySelector('.btn-secondary');
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i>Copiato!';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
