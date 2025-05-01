@@ -168,6 +168,13 @@
             color: var(--secondary);
         }
 
+        .event-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
         .event-select-container {
             position: relative;
         }
@@ -192,6 +199,36 @@
         }
 
         .select-arrow {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        .time-input-container {
+            position: relative;
+        }
+
+        .time-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            background-color: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .time-icon {
             position: absolute;
             right: 1rem;
             top: 50%;
@@ -321,6 +358,9 @@
             .days-container {
                 grid-template-columns: repeat(4, 1fr);
             }
+            .event-form {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 576px) {
@@ -424,7 +464,7 @@
                 id: "minimoto",
                 name: "Gara Mini Moto",
                 title: "Gara Mini Moto",
-                description: "Scalda il motore e preparati a dare il massimo nella Gara Mini Moto più folle della città! Ti aspetta un'entusiasmante competizione sull'ovale dietro il Casinò, dove solo i più agili, veloci e determinati riusciranno a completare tutti e 20 i giri e tagliare il traguardo per primi. La pista è stretta, le curve sono insidiose e ogni errore può costarti la vittoria! Porta la tua Mini Moto, affila i riflessi e dimostra chi è il vero re dell'asfalto. In palio ci sono ben 50.000€, ma solo uno potrà alzare il trofeo. Non è solo una gara, è una battaglia all'ultimo metro. Sei pronto a far rombare il motore e lasciare tutti dietro di te?",
+                description: "Scalda il motore e preparati a dare il massimo nella Gara Mini Moto più folle della città! {{day}} ti aspetta un'entusiasmante competizione sull'ovale dietro il Casinò, dove solo i più agili, veloci e determinati riusciranno a completare tutti e 20 i giri e tagliare il traguardo per primi. La pista è stretta, le curve sono insidiose e ogni errore può costarti la vittoria! Porta la tua Mini Moto, affila i riflessi e dimostra chi è il vero re dell'asfalto. In palio ci sono ben 50.000€, ma solo uno potrà alzare il trofeo. Non è solo una gara, è una battaglia all'ultimo metro. Sei pronto a far rombare il motore e lasciare tutti dietro di te?",
                 image: "image/events/icon/minimotoicon.png",
                 flyer: "image/events/flyer/minimotorace.png"
             },
@@ -440,7 +480,7 @@
                 id: "gokart",
                 name: "Sfida Go-Kart",
                 title: "Sfida Go-Kart",
-                description: "La pista ti aspetta! Mettiti al volante del tuo Go-Kart e preparati a bruciare l’asfalto in una gara che metterà alla prova la tua abilità e il tuo sangue freddo. Curve strette, rettilinei mozzafiato e avversari agguerriti renderanno ogni giro una sfida. I migliori piloti si affronteranno per 40.000€ e il titolo di campione Go-Kart della stagione. Solo chi saprà gestire il mezzo e tenere i nervi saldi fino all’ultimo metro potrà trionfare. Accendi il motore, la bandiera a scacchi ti aspetta!",
+                description: "La pista ti aspetta! Mettiti al volante del tuo Go-Kart e preparati a bruciare l'asfalto in una gara che metterà alla prova la tua abilità e il tuo sangue freddo. Curve strette, rettilinei mozzafiato e avversari agguerriti renderanno ogni giro una sfida. I migliori piloti si affronteranno per 40.000€ e il titolo di campione Go-Kart della stagione. Solo chi saprà gestire il mezzo e tenere i nervi saldi fino all'ultimo metro potrà trionfare. Accendi il motore, la bandiera a scacchi ti aspetta!",
                 image: "image/events/icon/gokarticon.png",
                 flyer: "image/events/flyer/gokartrace.png"
             },
@@ -457,6 +497,7 @@
         // Array per tenere traccia dei giorni selezionati
         const selectedDays = [false, false, false, false, false, false, false];
         const selectedEvents = [null, null, null, null, null, null, null];
+        const selectedTimes = ["21:00", "21:00", "21:00", "21:00", "21:00", "21:00", "21:00"]; // Default time 21:00
         
         // Giorni della settimana in italiano
         const daysOfWeek = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"];
@@ -498,6 +539,10 @@
                     dayHeader.innerHTML = `<i class="fas ${dayIcons[i]}"></i> ${daysOfWeek[i]}`;
                     eventDay.appendChild(dayHeader);
                     
+                    const eventForm = document.createElement('div');
+                    eventForm.className = 'event-form';
+                    
+                    // Container for event select
                     const eventSelectContainer = document.createElement('div');
                     eventSelectContainer.className = 'event-select-container';
                     
@@ -540,7 +585,29 @@
                     selectArrow.className = 'fas fa-chevron-down select-arrow';
                     eventSelectContainer.appendChild(selectArrow);
                     
-                    eventDay.appendChild(eventSelectContainer);
+                    // Container for time input
+                    const timeInputContainer = document.createElement('div');
+                    timeInputContainer.className = 'time-input-container';
+                    
+                    const timeInput = document.createElement('input');
+                    timeInput.type = 'time';
+                    timeInput.className = 'time-input';
+                    timeInput.value = selectedTimes[i];
+                    timeInput.setAttribute('data-day', i);
+                    timeInput.addEventListener('change', function() {
+                        const dayIndex = parseInt(this.getAttribute('data-day'));
+                        selectedTimes[dayIndex] = this.value;
+                    });
+                    
+                    timeInputContainer.appendChild(timeInput);
+                    const timeIcon = document.createElement('i');
+                    timeIcon.className = 'fas fa-clock time-icon';
+                    timeInputContainer.appendChild(timeIcon);
+                    
+                    eventForm.appendChild(eventSelectContainer);
+                    eventForm.appendChild(timeInputContainer);
+                    
+                    eventDay.appendChild(eventForm);
                     eventSection.appendChild(eventDay);
                 }
             }
@@ -548,9 +615,14 @@
             if (hasSelectedDays) {
                 const sectionTitle = document.createElement('h2');
                 sectionTitle.className = 'section-title';
-                sectionTitle.innerHTML = '<i class="fas fa-list-alt"></i>Seleziona gli eventi';
+                sectionTitle.innerHTML = '<i class="fas fa-list-alt"></i>Seleziona gli eventi e orari';
                 eventSection.prepend(sectionTitle);
             }
+        }
+        
+        // Funzione di utility per sostituire il placeholder {{day}}
+        function replaceDay(description, dayName) {
+            return description.replace("{{day}}", dayName);
         }
         
         // Genera il codice JavaScript per gli eventi settimanali
@@ -564,20 +636,26 @@
             for (let i = 0; i < 7; i++) {
                 if (selectedEvents[i]) {
                     const event = selectedEvents[i];
+                    const time = selectedTimes[i];
+                    
+                    // Sostituisci {{day}} con il nome del giorno nel testo della descrizione
+                    const updatedDescription = replaceDay(event.description, daysOfWeek[i]);
+                    
                     code += `        { // ${daysOfWeek[i]} - ${event.name}\n`;
                     code += `            title: "${event.title}",\n`;
-                    code += `            description: "${event.description}",\n`;
+                    code += `            description: "${updatedDescription}",\n`;
+                    code += `            time: "${time}",\n`;
                     code += `            image: "${event.image}",\n`;
                     code += `            flyer: "${event.flyer}"\n`;
                     code += "        }";
                 } else {
-                    code += `        null, // ${daysOfWeek[i]} - nessun evento`;
+                    code += `        null // ${daysOfWeek[i]} - nessun evento`;
                 }
                 
                 if (i < 6) {
-                    code += ",\n";
+                    code += ",\n\n";
                 } else {
-                    code += "\n";
+                    code += "\n\n";
                 }
             }
             
